@@ -1,43 +1,40 @@
 
-function criarCarteira() {
-    return {
-      saldo: 0,
-      transacoes: [],
-    };
-  }
-  
-  function lançarEntrada(carteira, valor) {
-    if (valor <= 0) {
-      return { sucesso: false, mensagem: "O valor de entrada deve ser maior que zero." };
-    }
-  
-    carteira.saldo += valor;
-    carteira.transacoes.push({ tipo: "entrada", valor });
-    return { sucesso: true, mensagem: `Entrada de R$${valor} lançada com sucesso. Saldo atual: R$${carteira.saldo}` };
-  }
-  
-  function lançarSaída(carteira, valor) {
-    if (valor <= 0) {
-      return { sucesso: false, mensagem: "O valor de saída deve ser maior que zero." };
-    }
-  
-    if (valor > carteira.saldo) {
-      return { sucesso: false, mensagem: "Saldo insuficiente para realizar a saída." };
-    }
-  
-    carteira.saldo -= valor;
-    carteira.transacoes.push({ tipo: "saída", valor });
-    return { sucesso: true, mensagem: `Saída de R$${valor} lançada com sucesso. Saldo atual: R$${carteira.saldo}` };
-  }
-  
+interface Carteira {
+  saldo: number;
+  transacoes: { tipo: string; valor: number }[];
+}
 
-  const minhaCarteira = criarCarteira();
-  
-  console.log(lançarEntrada(minhaCarteira, 800)); 
-  console.log(lançarSaída(minhaCarteira, 50));   
-  console.log(lançarSaída(minhaCarteira, 80));   
-  console.log(lançarEntrada(minhaCarteira, 30));   
-  
+function criarCarteira(): Carteira {
+  return { saldo: 0, transacoes: [] };
+}
+
+function lancarTransacao(carteira: Carteira, valor: number, tipo: string): { sucesso: boolean; mensagem: string } {
+  if (valor <= 0) {
+      return { sucesso: false, mensagem: `O valor de ${tipo} deve ser maior que zero.` };
+  }
+
+  if (tipo === 'entrada') {
+      carteira.saldo += valor;
+  } else if (tipo === 'saida' && valor <= carteira.saldo) {
+      carteira.saldo -= valor;
+  } else {
+      return { sucesso: false, mensagem: 'Saldo insuficiente para realizar a saída.' };
+  }
+
+  const transacao = { tipo, valor };
+  carteira.transacoes.push(transacao);
+
+  const mensagem = `${tipo.charAt(0).toUpperCase() + tipo.slice(1)} de R$${valor} lançada com sucesso. Saldo atual: R$${carteira.saldo}`;
+
+  return { sucesso: true, mensagem };
+}
+
+const minhaCarteira: Carteira = criarCarteira();
+
+console.log(lancarTransacao(minhaCarteira, 800, 'entrada'));
+console.log(lancarTransacao(minhaCarteira, 30, 'saida'));
+console.log(lancarTransacao(minhaCarteira, 80, 'saida'));
+console.log(lancarTransacao(minhaCarteira, 98, 'entrada'));
 
 //   3. Crie um programa que simule uma carteira de dinheiro. Este
 // programa vai precisar ter uma carteira contendo saldo, transações
